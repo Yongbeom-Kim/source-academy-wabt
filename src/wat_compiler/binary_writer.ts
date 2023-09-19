@@ -620,6 +620,7 @@ export class BinaryWriter {
       case TokenType.TableInit:
         return this.encodeTableVarToken(token);
       case TokenType.RefFunc:
+      case TokenType.Call:
         return this.encodeFuncRefToken(token);
       case TokenType.ElemDrop:
         return this.encodeElementVarToken(token);
@@ -737,14 +738,17 @@ export class BinaryWriter {
     token: IRToken,
   ): number {
     const nameToResolve = token.lexeme;
-    for (const [i, fn] of this.module.functions.entries()) {
+    const functions = (this.module.imports.filter((x) => x.importType === TokenType.Func) as (ImportExpression | FunctionExpression)[])
+      .concat(this.module.functions);
+
+    for (const [i, fn] of functions.entries()) {
       if (fn.getID() === nameToResolve) {
         return i;
       }
     }
     throw new Error(
       `Function name ${nameToResolve} not found in modules. Function names available: ${
-        this.module.functions
+        functions
           .map((fn) => fn.getID())
           .filter((name) => name !== null)
       }`,

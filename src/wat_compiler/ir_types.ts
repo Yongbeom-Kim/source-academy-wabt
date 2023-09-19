@@ -439,7 +439,7 @@ export class ExportExpression extends IntermediateRepresentation {
 
 type ImportType = TokenType.Func | TokenType.Table | TokenType.Memory | TokenType.Global;
 
-export class ImportExpression extends IntermediateRepresentation {
+export class ImportExpression extends IntermediateRepresentation implements HasIdentifier {
   private _parent: IntermediateRepresentation | null = null;
   importModule: string;
   importName: string;
@@ -454,6 +454,13 @@ export class ImportExpression extends IntermediateRepresentation {
     this.importModule = importModule;
     this.importName = importName;
     this.importType = importType;
+  }
+
+  getID(): string | null {
+    if (this.importType === TokenType.Func) {
+      return this.functionSignature!.functionName;
+    }
+    throw new Error('getID not implemented for memory, global or tables');
   }
 
   static functionImport(importModule: string, importName: string, functionSignature: FunctionSignature) {
